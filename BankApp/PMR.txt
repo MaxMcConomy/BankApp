@@ -1,0 +1,14 @@
+﻿/*
+Bank App
+Author@ Max McConomy
+Version@ V1
+~~~
+This Programs purpose is to be a make belive banking system
+*/
+
+--PMR--
+- I realize If i can add classes into repl.it I don't know how
+- I did a python project before this and now I'm forgetting semicolions
++ used youtube to succsesfully set up a class & onbject
+- I can't get the object to give its info to a method
+- One of my console.readline's doesnt work
