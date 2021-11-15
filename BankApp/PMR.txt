@@ -12,3 +12,4 @@ This Programs purpose is to be a make belive banking system
 + used youtube to succsesfully set up a class & onbject
 - I can't get the object to give its info to a method
 - One of my console.readline's doesnt work
+- I completley forgot to add to the PMR

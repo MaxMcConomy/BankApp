@@ -15,195 +15,401 @@ namespace BankApp
     {
         public static void Main(string[] args)
         {
-            string UsernamesPath = @"c:\Users\Sonic\source\repos\BankApp\BankApp\Usernames.txt";
-            string PasswordsPath = @"c:\Users\Sonic\source\repos\BankApp\BankApp\Passwords.txt";
-            string BalancesPath = @"c:\Users\Sonic\source\repos\BankApp\BankApp\Balances.txt";
-            string[] Usernames = System.IO.File.ReadAllLines(UsernamesPath);
-            string[] Passwords = System.IO.File.ReadAllLines(PasswordsPath);
-            string[] Balances = System.IO.File.ReadAllLines(BalancesPath);
+            Global globalVars = new Global();
+            //TODO have chefy be my tester tomorrow
+            //TODO build and test that the program works on other PC's
+            globalVars.usernamesPath = @"G:\My Drive\BankApp\userData\Usernames.txt";
+            globalVars.passwordsPath = @"G:\My Drive\BankApp\userData\Passwords.txt";
+            globalVars.balancesPath = @"G:\My Drive\BankApp\userData\Balances.txt";
+            globalVars.changeLogPath = @"G:\My Drive\BankApp\ChangeLog.txt";
+            globalVars.usernames = System.IO.File.ReadAllLines(globalVars.usernamesPath);
+            globalVars.passwords = System.IO.File.ReadAllLines(globalVars.passwordsPath);
+            globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
+            globalVars.screenPosition = 0;
 
-            int position = (LoginCheck(Login(), Usernames, UsernamesPath, PasswordsPath, BalancesPath));
-            if(PasswordCheck(position, Passwords, Usernames) == false)
-            {
-                Environment.Exit(0);
-            }
+            Screen screenOne = new Screen();
+            
+            screenOne.buttonOne =   "  Withdrawl  ";
+            screenOne.buttonTwo =   "   Deposit   ";
+            screenOne.buttonThree = "   Transfer  ";
+            screenOne.screenNumber = 1;
+
+            //=======================================================================================
+            
 
             bool satisfied = false;
             while (satisfied == false)
             {
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.White;
-                Logo();
-                accountInfo(Usernames, Balances, position);
-                buttons("  withdrawl  ", "   deposit   ", "  transfer   ", "1", position, Usernames, Balances, BalancesPath);
-                Usernames = System.IO.File.ReadAllLines(UsernamesPath);
-                Passwords = System.IO.File.ReadAllLines(PasswordsPath);
-                Balances = System.IO.File.ReadAllLines(BalancesPath);
-
-                Console.Clear();
-                Logo();
-                accountInfo(Usernames, Balances, position);
-                Console.WriteLine("Would you like to continue? (Y/N)");
-                string YN = Console.ReadLine();
-                while (YN != "Y" && YN != "N")
+                if(globalVars.screenPosition == 0)
                 {
                     Console.Clear();
-                    Logo();
-                    accountInfo(Usernames, Balances, position);
-                    Console.WriteLine("Y/N");
-                    YN = Console.ReadLine();
+                    startUp();
+                    Console.Clear();
+                    globalVars.screenPosition++;
                 }
-                if (YN == "Y")
+                if (globalVars.screenPosition == 1)
                 {
-                    satisfied = false;
+                    globalVars.position = (LoginCheck(Login(globalVars, true), globalVars));
+                    if(globalVars.position == -2)//To go back
+                    {
+                        globalVars.screenPosition--;
+                    }
+                    if (globalVars.position == 3)//To new account
+                    {
+                        globalVars.screenPosition = 3;
+                    }
+                    if (globalVars.position == 1)//If it needs to redo
+                    {
+                        while (globalVars.position == 1)
+                        {
+                            globalVars.screenPosition = 1;
+                            globalVars.position = (LoginCheck(Login(globalVars, false), globalVars));
+                        }
+                    }
+                    if(globalVars.position > 1 && globalVars.screenPosition == 1)//To go forward
+                    {
+                        globalVars.screenPosition++;
+                    }
                 }
-                else if (YN == "N")
+                if (globalVars.screenPosition == 2)
                 {
-                    satisfied = true;
+                    string checkThis = PasswordCheck(globalVars);
+                    if (checkThis == "false")
+                    {
+                        exitApp();
+                    }
+                    else if(checkThis == "-2")
+                    {
+                        globalVars.screenPosition--;
+                    }
+                    else
+                    {
+                        globalVars.screenPosition = 4;
+                    }
                 }
-                
+                if(globalVars.screenPosition == 3)
+                {
+                    globalVars.position = NewAccount(globalVars);
+                    if(globalVars.position == -2)
+                    {
+                        globalVars.screenPosition = 1;
+                    }
+                    if(globalVars.position == 0)
+                    {
+                        Console.WriteLine("problem");
+                        Console.ReadLine();//TODO i dont know what this is meant to do
+                    }
+                    if (globalVars.screenPosition == 3)
+                    {
+                        globalVars.screenPosition++;
+                        globalVars.usernames = System.IO.File.ReadAllLines(globalVars.usernamesPath);
+                        globalVars.passwords = System.IO.File.ReadAllLines(globalVars.passwordsPath);
+                        globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
+                    }
+                }
+                if (globalVars.screenPosition == 4)
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    clearLogoNInfo(globalVars);
+                    int checkThis = readButtons(globalVars, screenOne);
+                    if(checkThis == -2)
+                    {
+                        globalVars.screenPosition = 1;
+                    }
+                    if (globalVars.screenPosition == 4)
+                    {
+                        globalVars.screenPosition++;
+                    }
+                    if (checkThis == 0)
+                    {
+                        globalVars.screenPosition = 5;
+                    }
+                }
+                if(globalVars.screenPosition == 5)
+                {
+                    satisfied = keepGoing(globalVars, satisfied);
+                    if (satisfied == false)
+                    {
+                        globalVars.screenPosition = 4;
+                    }
+                }
+                globalVars.usernames = System.IO.File.ReadAllLines(globalVars.usernamesPath);
+                globalVars.passwords = System.IO.File.ReadAllLines(globalVars.passwordsPath);
+                globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
             }
-            Console.Clear();
-            Logo();
-            accountInfo(Usernames, Balances, position);
-            Console.WriteLine("Thank you for banking with us");
-            Console.ReadLine();
-            Environment.Exit(0);
         }
 
         //THE LOGIN
-        public static string Login()
+        public static string Login(Global globalVars, bool error)
         {
+            Console.Clear();
             Logo();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("Press \"NEW\" to create a new account");
-            Console.WriteLine("\t\t Username:");
+            Console.WriteLine("Enter \"NEW\" to create an account");
+            Console.WriteLine("Enter your username:");
+            if(error == false)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("Username not found");
+                Console.WriteLine("Please try agian");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
             string loginUsername = Console.ReadLine();
+            
             return (loginUsername);
         }
-        public static int LoginCheck(string CheckThis, string[] lines, string usernamePath, string passwordsPaths, string balancePaths)
+        public static int LoginCheck(string checkUsername, Global globalVars)
         {
-            if(CheckThis == "NEW")
+            if(checkUsername.ToUpper() == "NEW")
             {
-                //NewAccount
-                NewAccount(usernamePath, passwordsPaths, balancePaths, lines);
+                return (3);
             }
-            for(int i = 0; i < lines.Length; i++)
+            if (checkUsername == "-1")
             {
-                if (lines[i] == CheckThis)
+                exitApp();
+            }
+            if(checkUsername == "-2")
+            {
+                return (-2);
+            }
+            for(int i = 2; i < globalVars.usernames.Length; i++)
+            {
+                if (globalVars.usernames[i] == checkUsername)
                 {
                     return(i);
                 }
             }
-            return(1);
+            return (1);
         }
-        public static void NewAccount(string usernamePath, string passwordsPaths, string balancePaths, string[] usernames)
+        public static int NewAccount(Global globalVars)
         {
+            int spot = 0;
             bool satisfied = false;
-            while(satisfied == false)
+            string newUsername = "error";
+            string newPassword = "error";
+            double deposit = 0;
+            while (satisfied == false)
             {
-
-                Console.Clear();
-                Logo();
-
-                Console.WriteLine("Enter your prefered username: ");
-                string username = Console.ReadLine();
-                for (int i = 0; i < usernames.Length; i++)
-                {
-                    if (username == usernames[i])
-                    {
-                        Console.WriteLine("That username is already in use, please pick a new one.");
-                        Console.ReadLine();
-                    }
-                }
-                Console.WriteLine("Enter your prefered password:");
-                string password = Console.ReadLine();
-
-                Console.Clear();
-                Logo();
-
-                Console.WriteLine("Please re-enter password");
-                string passwordRedo = Console.ReadLine();
-                while (passwordRedo != password)
+                if (spot == 0)
                 {
                     Console.Clear();
                     Logo();
-                    Console.WriteLine("Please re-enter password");
-                    passwordRedo = Console.ReadLine();
+
+                    Console.WriteLine("Enter your prefered username: ");
+                    newUsername = Console.ReadLine();
+                    if (newUsername == "-1")
+                    {
+                        exitApp();
+                    }
+                    if(newUsername == "-2")
+                    {
+                        return (-2);
+                    }
+
+                    bool inUse = true;
+                    while (inUse == true)
+                    {
+                        inUse = false;
+
+                        for (int i = 0; i < globalVars.usernames.Length; i++)
+                        {
+                            if (newUsername == globalVars.usernames[i])
+                            {
+                                inUse = true;
+                                break;
+                            }
+                        }
+                        if (inUse == true)
+                        {
+                            Console.Clear();
+                            Logo();
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
+                            Console.WriteLine("That username is already in use, please enter a new one.");
+                            Console.ForegroundColor = ConsoleColor.White;
+                            newUsername = Console.ReadLine();
+                            if (newUsername == "-1")
+                            {
+                                exitApp();
+                            }
+                            else if(newUsername == "-2")
+                            {
+                                return (-2);
+                            }
+
+                        }
+                        spot++;
+                    }
+
                 }
-
-                Console.Clear();
-                Logo();
-                Console.WriteLine("How Much are you depositing initially?");
-                double deposit = Convert.ToDouble(Console.ReadLine());
-
-                Console.Clear();
-                Logo();
-                Console.WriteLine("Username: " + username);
-                Console.WriteLine("Password: " + password);
-                Console.WriteLine("Balance: " + deposit);
-                Console.WriteLine("");
-                Console.WriteLine("Is this correct? (Y/N)");
-                string YN = Console.ReadLine();
-                if (YN == "Y")
+                if (spot == 1)
                 {
-                    satisfied = true;
+                    Console.Clear();
+                    Logo();
+                    Console.WriteLine("Enter your prefered password:");
+                    newPassword = Console.ReadLine();
+                    if (newPassword == "-1")
+                    {
+                        exitApp();
+                    }
+                    else if (newPassword == "-2")
+                    {
+                        spot--;
+                    }
+                    if (spot == 1)
+                    {
+
+                        Console.Clear();
+                        Logo();
+
+                        Console.WriteLine("Please re-enter password");
+                        string passwordRedo = Console.ReadLine();
+                        if (passwordRedo == "-1")
+                        {
+                            exitApp();
+                        }
+                        else if (passwordRedo == "-2")
+                        {
+                            spot--;
+                        }
+                        while (passwordRedo != "-1" && passwordRedo != "-2" && passwordRedo != newPassword && spot == 1)
+                        {
+                            Console.Clear();
+                            Logo();
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
+                            Console.WriteLine("Password Didn't match.");
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.WriteLine("Please re-enter password");
+                            passwordRedo = Console.ReadLine();
+                            if (passwordRedo == "-1")
+                            {
+                                exitApp();
+                            }
+                            else if (passwordRedo == "-2")
+                            {
+                                spot--;
+                            }
+                        }
+                        if (spot == 1)
+                        {
+                            spot++;
+                        }
+                    }
                 }
-                else if(YN == "N")
+                if (spot == 2)
                 {
-                    satisfied = false;
+                    Console.Clear();
+                    Logo();
+                    Console.WriteLine("Please enter how much are you depositing initially.");
+                    deposit = Convert.ToDouble(Console.ReadLine());
+                    while (deposit < -2)
+                    {
+                        Console.Clear();
+                        Logo();
+                        Console.WriteLine("Please enter how much are you depositing initially.");
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine("Please enter a positive number");
+                        deposit = Convert.ToDouble(Console.ReadLine());
+                    }
+                    if (deposit == -1)
+                    {
+                        exitApp();
+                    }
+                    else if (deposit == -2)
+                    {
+                        spot--;
+                    }
+                    if (spot == 2)
+                    {
+                        spot++;
+                    }
                 }
+                if (spot == 3)
+                { 
+                    Console.Clear();
+                    Logo();
+                    Console.WriteLine("Username: " + newUsername);
+                    Console.WriteLine("Password: " + newPassword);
+                    Console.WriteLine("Balance: " + deposit);
+                    Console.WriteLine("");
+                    Console.WriteLine("Is this correct? (Y/N)");
+                    string YN = (Console.ReadLine()).ToUpper();
+                    if (YN == "Y")
+                    {
+                        satisfied = true;
+                        AddText(globalVars.usernamesPath, newUsername);
+                        AddText(globalVars.passwordsPath, newPassword);
+                        AddText(globalVars.balancesPath, Convert.ToString(deposit));
 
-                AddText(usernamePath, username);
-                AddText(passwordsPaths, password);
-                AddText(balancePaths, Convert.ToString(deposit));
+                        Console.Clear();
+                        Logo();
+                        Console.WriteLine("You have been registered");
+                        return globalVars.usernames.Length;
+                    }
+                    else if (YN == "N" || YN == "-2")
+                    {
+                        satisfied = false;
+                        spot = 0;
 
-                Console.Clear();
-                Logo();
-                Console.WriteLine("You have been registered");
-                Console.WriteLine("Thank you for banking with us.");
-                Console.WriteLine("Now closing");
-                Console.ReadLine();
-                Environment.Exit(0);
+                    }
+                    else if(YN == "-1")
+                    {
+                        exitApp();
+                    }
+                }
+                
             }
-
+            return (-10);
         }
         //The Password
-        public static string Password(int position, string[] Usernames)
+        public static string Password(Global globalVars, bool error, int numberOfTries)
         {
             Logo();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("\t\t Password for " + Usernames[position] + ": ");
+            Console.WriteLine("Enter Password for " + globalVars.usernames[globalVars.position] + ": ");
+            if(error == true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("Password doesn't match");
+                Console.WriteLine("You have " + (numberOfTries + 1) + " tries Left");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
             string loginPassword = Console.ReadLine();
+            if(loginPassword == "-1")
+            {
+                exitApp();
+            }
+            Console.Clear();
             return (loginPassword);
         }
-        public static bool PasswordCheck(int position, string[] path, string[] path2)
+        public static string PasswordCheck(Global globalVars)
         {
-            int numberOfTries = 10;
+            int numberOfTries = 9;
             Console.Clear();
-            while (path[position] != Password(position, path2))
+            string tryThis = Password(globalVars, false, numberOfTries);
+            if(tryThis == "-1")
             {
+                exitApp();
+            }
+            if(tryThis == "-2")
+            {
+                return ("-2");
+            }
+            while (globalVars.passwords[globalVars.position] != tryThis)
+            {
+                numberOfTries--;
+                tryThis = Password(globalVars, true, numberOfTries);
                 if (numberOfTries <= 0)
                 {
                     Console.Clear();
                     Logo();
                     Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine("Failed too many passwords, now leaving...");
+                    Console.WriteLine("Failed too many passwords");
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.ReadLine();
-                    break;
+                    exitApp();
                 }
-                numberOfTries--;
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("Password doesn't match");
-                Console.WriteLine("You have " + numberOfTries + " tries Left");
-                Console.ForegroundColor = ConsoleColor.White;
+                
                 
             }
-            return(true);
+            return("true");
         }
         //Layout materials
         private static void Logo()
@@ -213,157 +419,406 @@ namespace BankApp
             Console.WriteLine("|             Max EcConomy Bank             |");
             Console.WriteLine("|           MaxMcConomy@gmail.com           |");
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            Console.WriteLine(" Enter \"-1\" to exit and \"-2\" to go back. ");
+            Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
-        public static void buttons(string b1F, string b2F, string b3F, string screen, int position, string[] Usernames, string[] Balances, string path)
+        public static void showButtons(Screen screen, Global globalVars)
         {
-            //b1F stands for Button 1 Function
+            clearLogoNInfo(globalVars);
             Console.WriteLine(" |~~~~~~~~~~~~~|~~~~~~~~~~~~~|~~~~~~~~~~~~~|");
             Console.WriteLine(" |1            |2            |3            |");
-            Console.WriteLine(" |" + b1F + "|" + b2F + "|" + b3F + "|");
+            Console.WriteLine(" |" + screen.buttonOne + "|" + screen.buttonTwo + "|" + screen.buttonThree + "|");
             Console.WriteLine(" |             |             |             |");
             Console.WriteLine(" |~~~~~~~~~~~~~|~~~~~~~~~~~~~|~~~~~~~~~~~~~|");
 
             Console.Write("What button do you want to press? (use the number in the corner)   ");
-            string buttonPress = Console.ReadLine();
-
-            if (buttonPress == "1" && screen == "1" )
-            {
-                //withdrawl
-                withdrawl(position, Balances, Usernames, path);
-            }
-            else if(buttonPress == "2" && screen == "1")
-            {
-                //deposit
-                deposit(position, Balances, Usernames, path);
-            }
-            else if(buttonPress == "3" && screen == "1")
-            {
-                //transfer
-                transfer(position, Balances, Usernames, path);
-            }
+            
         }
-        private static void accountInfo(string[] usernames, string[] balances, int position)
+        public static int readButtons(Global globalVars, Screen screen)
         {
-            Console.WriteLine("Account Holder: " + usernames[position]);
-            Console.WriteLine("Account Balance: $" + balances[position]);
+            bool satisfied = false;
+            int spot = 0;
+            string buttonPress = "";
+            while (satisfied == false)
+            {
+                if (spot == 0)
+                {
+                    showButtons(screen, globalVars);
+                    buttonPress = Console.ReadLine();
+                    bool goodValue = false;
+                    if (buttonPress == "1" || buttonPress == "2" || buttonPress == "3")
+                    {
+                        goodValue = true;
+                        spot++;
+                    }
+                    else if (buttonPress == "-1")
+                    {
+                        exitApp();
+                    }
+                    else if (buttonPress == "-2")
+                    {
+                        return (-2);
+                    }
+                    while (goodValue == false)
+                    {
+                        showButtons(screen, globalVars);
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine(buttonPress + "isnt correct");
+                        Console.WriteLine("ERROR. please insert a number above");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        buttonPress = Console.ReadLine();
+                        if (buttonPress == "1" || buttonPress == "2" || buttonPress == "3" || buttonPress == "-1")
+                        {
+                            goodValue = true;
+                            spot++;
+                        }
+                        else if (buttonPress == "-1")
+                        {
+                            exitApp();
+                        }
+                        else if (buttonPress == "-2")
+                        {
+                            return (-2);
+                        }
+                        spot++;
+                    }
+                }
+                if (buttonPress == "1" && screen.screenNumber == 1 && spot == 1)//withdrawl
+                {
+                    int checkThis = withdrawl(globalVars);
+                    if (checkThis == -1)
+                    {
+                        exitApp();
+                    }
+                    if (checkThis == -2)
+                    {
+                        spot = 0;
+                    }
+                    if (checkThis == 0)
+                    {
+                        return (0);
+                    }
+                }
+                else if (buttonPress == "2" && screen.screenNumber == 1 && spot == 1)//deposit
+                {
+                    int checkThis = deposit(globalVars);
+                    if (checkThis == -1)
+                    {
+                        exitApp();
+                    }
+                    if (checkThis == -2)
+                    {
+                        spot = 0;
+                    }
+                    if (checkThis == 0)
+                    {
+                        return (0);
+                    }
+                }
+                else if (buttonPress == "3" && screen.screenNumber == 1 && spot == 1)//transfer
+                {
+                    int checkThis = transfer(globalVars);
+                    if (checkThis == -1)
+                    {
+                        exitApp();
+                    }
+                    if (checkThis == -2)
+                    {
+                        spot = 0;
+                    }
+                    if (checkThis == 0)
+                    {
+                        return (0);
+                    }
+                }
+            }
+            return (0);
+        }
+        private static void accountInfo(Global globalVars)
+        {
+            Console.WriteLine("Account Holder: " + globalVars.usernames[globalVars.position]);
+            Console.WriteLine("Account Balance: $" + globalVars.balances[globalVars.position]);
             Console.WriteLine("_________________________________________");
         }
+        private static void clearLogoNInfo(Global globalVars)
+        {
+            Console.Clear();
+            Logo();
+            accountInfo(globalVars);
+        }
+        private static void exitApp()
+        {
+            Console.Clear();
+            Logo();
+            Console.WriteLine("Thank you for banking with us");
+            System.Threading.Thread.Sleep(1000);
+            Environment.Exit(0);
+        }
+        private static void startUp()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Logo();
+            Console.WriteLine("Welcome to Max EcConomy bank!");
+            Console.WriteLine("");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("Please note that you need to type and press enter with this program.");
+            Console.WriteLine("");
+            Console.WriteLine("Before you use this program please make sure you have");
+            Console.WriteLine("read the README file and followed its instructions.");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("");
+            Console.Write("Press enter to continue.");
+            Console.ReadLine();
+        }
+        private static bool keepGoing(Global globalVars, bool satisfied)
+        {
+            clearLogoNInfo(globalVars);
+            Console.WriteLine("Would you like to continue? (Y/N)");
+            string YN = (Console.ReadLine()).ToUpper();
+            while (YN != "Y" && YN != "N")
+            {
+                clearLogoNInfo(globalVars);
+                Console.WriteLine("Y/N");
+                YN = Console.ReadLine();
+            }
+            if (YN == "Y")
+            {
+                satisfied = false;
+            }
+            else if (YN == "N")
+            {
+                exitApp();
+            }
+            return (satisfied);
+        }
         //Functions
-        public static void withdrawl(int position, string[] Balances, string[] Usernames, string path)
+        public static double IsNumeric(string checkIfNumber, Global globalVars)
         {
-            Console.Clear();
-            Logo();
-            accountInfo(Usernames, Balances, position);
-
-            Console.WriteLine("How much would you like to withdrawl from your account? ");
-            double WDAmount = Convert.ToDouble(Console.ReadLine());
-            while(Math.Round(Convert.ToDouble(Balances[position]) - WDAmount, 2) < 0)
+            int num = -1;
+            while (int.TryParse(checkIfNumber, out num) == false)
             {
+                clearLogoNInfo(globalVars);
                 Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("You cannot withdrawl money you don't have.");
-                Console.WriteLine("Press \"00.00\" to leave");
+                Console.WriteLine("Please enter a number");
                 Console.ForegroundColor = ConsoleColor.White;
-                WDAmount = Convert.ToDouble(Console.ReadLine());
-                if(WDAmount == 00.00)
-                {
-                    Console.WriteLine("Thank you for banking with us.");
-                    Environment.Exit(0);
-                }
+                checkIfNumber = Console.ReadLine();
             }
-            double amountLeft = Math.Round(Convert.ToDouble(Balances[position]) - WDAmount, 2);
-            string text = File.ReadAllText(path);
-            text = text.Replace(Balances[position], Convert.ToString(amountLeft));
-            File.WriteAllText(path, text);
-            Balances = System.IO.File.ReadAllLines(path);
-
-            Console.Clear();
-            Logo();
-            accountInfo(Usernames, Balances, position);
-            Console.WriteLine("You know have $" + amountLeft + " in yout account.");
-            Console.ReadLine();
+            return Math.Round(Convert.ToDouble(checkIfNumber), 2);
         }
-        public static void deposit(int position, string[] Balances, string[] Usernames, string path)
+        public static int withdrawl(Global globalVars)
         {
-            Console.Clear();
-            Logo();
-            accountInfo(Usernames, Balances, position);
-
-            Console.WriteLine("How much are you depositing today?");
-            double DPAmount = Convert.ToDouble(Console.ReadLine());
-            double newBalance = Math.Round(Convert.ToDouble(Balances[position]) + DPAmount,2);
-
-            string text = File.ReadAllText(path);
-            text = text.Replace(Balances[position], Convert.ToString(newBalance));
-            File.WriteAllText(path, text);
-            Balances = System.IO.File.ReadAllLines(path);
-
-            Console.Clear();
-            Logo();
-            accountInfo(Usernames, Balances, position);
-            Console.WriteLine("You know have $" + newBalance + " in yout account.");
-            Console.ReadLine();
-        }
-        public static void transfer(int position, string[] Balances, string [] Usernames, string path)
-        {
-            Console.Clear();
-            Logo();
-            accountInfo(Usernames, Balances, position);
-            Console.WriteLine("Who are you trying to transfer to today? ");
-            string TNUser = Console.ReadLine();
-            if (TNUser != Usernames[position] && TNUser != Usernames[0] && TNUser != Usernames[1])
+            clearLogoNInfo(globalVars);
+            Console.WriteLine("Please enter how much you would like to withdrawl from your account. ");
+            double WDAmount = IsNumeric(Console.ReadLine(), globalVars);
+            while(WDAmount <= -3)
             {
-                for (int i = 0; i < Usernames.Length; i++)
-                {
-                    if (Usernames[i] == TNUser)
-                    {
-                        Console.Clear();
-                        Logo();
-                        accountInfo(Usernames, Balances, position);
-                        Console.WriteLine(Usernames[position] + " is transfering to " + Usernames[i]);
-                        Console.WriteLine("How Much would you like to transfer? ");
-                        double TNAmount = Math.Round(Convert.ToDouble(Console.ReadLine()),2);
-                        double TNUserNewAmount = Math.Round(Convert.ToDouble(Balances[i]) + TNAmount);
-                        double UserNewAmount = Math.Round(Convert.ToDouble(Balances[position]) - TNAmount);
-
-                        string text = File.ReadAllText(path);
-                        text = text.Replace(Balances[i], Convert.ToString(TNUserNewAmount));
-                        File.WriteAllText(path, text);
-                        Balances = System.IO.File.ReadAllLines(path);
-                        text = text.Replace(Balances[position], Convert.ToString(UserNewAmount));
-                        File.WriteAllText(path, text);
-                        Balances = System.IO.File.ReadAllLines(path);
-
-                        Console.Clear();
-                        Logo();
-                        accountInfo(Usernames, Balances, position);
-                        Console.WriteLine("Succesfully Sent $" + TNAmount + "to " + TNUser);
-                        Console.WriteLine("You now have $" + UserNewAmount + " in your account.");
-                        Console.ReadLine();
-                    }
-                    else
-                    {
-                        Console.Clear();
-                        Logo();
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                        Console.WriteLine("That account is not real");
-                        Console.WriteLine("Please try again");
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.ReadLine();
-                    }
-                }
+                clearLogoNInfo(globalVars);
+                Console.WriteLine("Please enter how much you would like to withdrawl from your account. ");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("Please enter a positive number.");
+                Console.ForegroundColor = ConsoleColor.White;
+                WDAmount = IsNumeric(Console.ReadLine(), globalVars);
             }
-            else
+            if(WDAmount == -1)
+            {
+                exitApp();
+            }
+            if (WDAmount == -2)
+            {
+                return (-2);
+            }
+            while (Math.Round(Convert.ToDouble(globalVars.balances[globalVars.position]) - WDAmount, 2) < 0)
             {
                 Console.Clear();
                 Logo();
+                accountInfo(globalVars);
                 Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("That account is either unable to be transfered to or is your own account");
-                Console.WriteLine("Please try again");
+                Console.WriteLine("You cannot withdrawl money you don't have.");
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.ReadLine();
-
-
+                Console.WriteLine("Please enter how much you would like to withdrawl from your account. ");
+                Console.ForegroundColor = ConsoleColor.White;
+                WDAmount = Convert.ToDouble(Console.ReadLine());
+                if(WDAmount == -1)
+                {
+                    exitApp();
+                }
+                if(WDAmount == -2)
+                {
+                    return (-2);
+                }
             }
+            double amountLeft = Math.Round(Convert.ToDouble(globalVars.balances[globalVars.position]) - WDAmount, 2);
+            string text = File.ReadAllText(globalVars.balancesPath);
+            text = text.Replace(globalVars.balances[globalVars.position], Convert.ToString(amountLeft));
+            File.WriteAllText(globalVars.balancesPath, text);
+            globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
+            AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " withdrew $" + WDAmount);
+
+            Console.Clear();
+            Logo();
+            accountInfo(globalVars);
+            Console.WriteLine("You know have $" + amountLeft + " in your account.");
+            Console.ReadLine();
+            return (0);
+        }
+        public static int deposit(Global globalVars)
+        {
+            clearLogoNInfo(globalVars);
+
+            Console.WriteLine("Please enter how much you would like to deposit. ");
+            double DPAmount = IsNumeric(Console.ReadLine(), globalVars);
+            while (DPAmount <= -3)
+            {
+
+                clearLogoNInfo(globalVars);
+                Console.WriteLine("Please enter how much you would like to deposit. ");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("Please enter a positive number.");
+                Console.ForegroundColor = ConsoleColor.White;
+                DPAmount = IsNumeric(Console.ReadLine(), globalVars);
+            }
+            if (DPAmount == -1)
+            {
+                exitApp();
+            }
+            else if(DPAmount == -2)
+            {
+                return (-2);
+            }
+
+            double newBalance = Math.Round(Convert.ToDouble(globalVars.balances[globalVars.position]) + DPAmount,2);
+
+            string text = File.ReadAllText(globalVars.balancesPath);
+            text = text.Replace(globalVars.balances[globalVars.position], Convert.ToString(newBalance));
+            File.WriteAllText(globalVars.balancesPath, text);
+            globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
+            AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " deposited $" + DPAmount);
+
+            clearLogoNInfo(globalVars);
+            Console.WriteLine("You know have $" + newBalance + " in your account.");
+            Console.ReadLine();
+            return (0);
+        }
+        public static int transfer(Global globalVars)
+        {
+            int spot = 0;
+            bool satisfied = false;
+            int otherPosition = 0;
+            double TNAmount = 0;
+            while (satisfied == false)
+            {
+                if(spot == 0)
+                {
+                    clearLogoNInfo(globalVars);
+                    Console.WriteLine("Please enter who you are trying to transfer to today. ");
+                    string TNUser = Console.ReadLine();
+                    if (TNUser == "-1")
+                    {
+                        exitApp();
+                    }
+                    else if (TNUser == "-2")
+                    {
+                        return (-2);
+                    }
+                    else
+                    {
+                        bool goodName = false;
+                        while (goodName == false)
+                        {
+                            if (TNUser != globalVars.usernames[globalVars.position])
+                            {
+                                for (int i = 2; i < globalVars.usernames.Length; i++)
+                                {
+                                    if (globalVars.usernames[i] == TNUser)
+                                    {
+                                        goodName = true;
+                                        otherPosition = i;
+                                        spot++;
+                                    }
+                                }
+                            }
+                            if(spot == 0)
+                            {
+                                clearLogoNInfo(globalVars);
+                                Console.WriteLine("Please enter who you are trying to transfer to today. ");
+                                Console.ForegroundColor = ConsoleColor.DarkRed;
+                                Console.WriteLine("That account does not exist, please try again.");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                TNUser = Console.ReadLine();
+                            }
+                        }
+                    }
+                }
+
+                if(spot == 1)
+                {
+                    clearLogoNInfo(globalVars);
+                    Console.WriteLine(globalVars.usernames[globalVars.position] + " is transfering to " + globalVars.usernames[otherPosition]);
+                    Console.WriteLine();
+                    Console.WriteLine("Please enter how much you would like to transfer. ");
+                    TNAmount = IsNumeric(Console.ReadLine(), globalVars);
+                    if(TNAmount == -1)
+                    {
+                        exitApp();
+                    }
+                    else if (TNAmount == -2)
+                    {
+                        spot--;
+                    }
+                    else if(TNAmount < -2)
+                    {
+                        clearLogoNInfo(globalVars);
+                        Console.WriteLine(globalVars.usernames[globalVars.position] + " is transfering to " + globalVars.usernames[otherPosition]);
+                        Console.WriteLine();
+                        Console.WriteLine("Please enter how much you would like to transfer. ");
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine("please enter a positive number");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        TNAmount = IsNumeric(Console.ReadLine(), globalVars);
+                    }
+                    if(spot == 1)
+                    {
+                        spot++;
+                    }
+                }
+
+                if(spot == 2)
+                {
+                    clearLogoNInfo(globalVars);
+                    double TNUserNewAmount = Math.Round(Convert.ToDouble(globalVars.balances[otherPosition]) + TNAmount);
+                    double UserNewAmount = Math.Round(Convert.ToDouble(globalVars.balances[globalVars.position]) - TNAmount);
+                    Console.WriteLine(globalVars.usernames[globalVars.position] + " is sending $" + TNAmount + " to " + globalVars.usernames[otherPosition] +".");
+                    Console.WriteLine("Is this correct? (Y/N)");
+                    string good = Console.ReadLine().ToUpper();
+                    if (good == "Y")
+                    {
+                        string text = File.ReadAllText(globalVars.balancesPath);
+                        text = text.Replace(globalVars.balances[otherPosition], Convert.ToString(TNUserNewAmount));
+                        File.WriteAllText(globalVars.balancesPath, text);
+                        globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
+                        text = text.Replace(globalVars.balances[globalVars.position], Convert.ToString(UserNewAmount));
+                        File.WriteAllText(globalVars.balancesPath, text);
+                        globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
+                        AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " transfered  $" + TNAmount + " to user " + globalVars.usernames[otherPosition]);
+
+                        clearLogoNInfo(globalVars);
+                        Console.WriteLine("Succesfully Sent $" + TNAmount + " to " + globalVars.usernames[otherPosition]);
+                        Console.WriteLine("You now have $" + UserNewAmount + " in your account.");
+                        Console.Write("Press enter to continue. ");
+                        Console.ReadLine();
+                        break;
+                    }
+                    if (good == "N" || good == "-2")
+                    {
+                        spot = 0;
+                    }
+                    else if (good == "-1")
+                    {
+                        exitApp();
+                    }
+                }
+            }
+            return (0);
         }
         //Filestream managment
         private static string ShowText(string path, int number)
@@ -378,6 +833,15 @@ namespace BankApp
             TextWriter tsw = new StreamWriter(path, true);
             tsw.WriteLine(Addthis);
             tsw.Close();
+        }
+        private static void AddChangeLogText(Global globalVars, string message)
+        {
+
+            AddText(globalVars.changeLogPath, "-------------------------------------------------");
+            AddText(globalVars.changeLogPath, "Date and time: " + DateTime.Now.ToString());
+            AddText(globalVars.changeLogPath, message);
+            AddText(globalVars.changeLogPath, "-------------------------------------------------");
+
         }
     }
 }
