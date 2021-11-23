@@ -18,10 +18,11 @@ namespace BankApp
             Global globalVars = new Global();
             //TODO have chefy be my tester tomorrow
             //TODO build and test that the program works on other PC's
+            //TODO document code
             globalVars.usernamesPath = @"G:\My Drive\BankApp\userData\Usernames.txt";
             globalVars.passwordsPath = @"G:\My Drive\BankApp\userData\Passwords.txt";
             globalVars.balancesPath = @"G:\My Drive\BankApp\userData\Balances.txt";
-            globalVars.changeLogPath = @"G:\My Drive\BankApp\ChangeLog.txt";
+            globalVars.changeLogPath = @"G:\My Drive\BankApp\userData\ChangeLog.txt";
             globalVars.usernames = System.IO.File.ReadAllLines(globalVars.usernamesPath);
             globalVars.passwords = System.IO.File.ReadAllLines(globalVars.passwordsPath);
             globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
@@ -404,6 +405,7 @@ namespace BankApp
                     Console.WriteLine("Failed too many passwords");
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.ReadLine();
+                    AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " had a failed login attempt");
                     exitApp();
                 }
                 
@@ -836,12 +838,10 @@ namespace BankApp
         }
         private static void AddChangeLogText(Global globalVars, string message)
         {
-
             AddText(globalVars.changeLogPath, "-------------------------------------------------");
             AddText(globalVars.changeLogPath, "Date and time: " + DateTime.Now.ToString());
             AddText(globalVars.changeLogPath, message);
             AddText(globalVars.changeLogPath, "-------------------------------------------------");
-
         }
     }
 }
