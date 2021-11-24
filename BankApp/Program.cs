@@ -16,13 +16,10 @@ namespace BankApp
         public static void Main(string[] args)
         {
             Global globalVars = new Global();
-            //TODO have chefy be my tester tomorrow
-            //TODO build and test that the program works on other PC's
-            //TODO document code
-            globalVars.usernamesPath = @"G:\My Drive\BankApp\userData\Usernames.txt";
-            globalVars.passwordsPath = @"G:\My Drive\BankApp\userData\Passwords.txt";
-            globalVars.balancesPath = @"G:\My Drive\BankApp\userData\Balances.txt";
-            globalVars.changeLogPath = @"G:\My Drive\BankApp\userData\ChangeLog.txt";
+            globalVars.usernamesPath = @"G:\.shortcut-targets-by-id\1L9FXfZ6Gk14A_KccWsyhIpjoyBOXHHtA\BankApp\userData\Usernames.txt";
+            globalVars.passwordsPath = @"G:\.shortcut-targets-by-id\1L9FXfZ6Gk14A_KccWsyhIpjoyBOXHHtA\BankApp\userData\Passwords.txt";
+            globalVars.balancesPath = @"G:\.shortcut-targets-by-id\1L9FXfZ6Gk14A_KccWsyhIpjoyBOXHHtA\BankApp\userData\Balances.txt";
+            globalVars.changeLogPath = @"G:\.shortcut-targets-by-id\1L9FXfZ6Gk14A_KccWsyhIpjoyBOXHHtA\BankApp\userData\ChangeLog.txt";
             globalVars.usernames = System.IO.File.ReadAllLines(globalVars.usernamesPath);
             globalVars.passwords = System.IO.File.ReadAllLines(globalVars.passwordsPath);
             globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
@@ -339,6 +336,7 @@ namespace BankApp
                         AddText(globalVars.usernamesPath, newUsername);
                         AddText(globalVars.passwordsPath, newPassword);
                         AddText(globalVars.balancesPath, Convert.ToString(deposit));
+                        AddChangeLogText(globalVars, "New account: " + newUsername + " Password: " + "Balance: " + Convert.ToString(deposit), 0);
 
                         Console.Clear();
                         Logo();
@@ -405,7 +403,7 @@ namespace BankApp
                     Console.WriteLine("Failed too many passwords");
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.ReadLine();
-                    AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " had a failed login attempt");
+                    AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " had a failed login attempt", 4);
                     exitApp();
                 }
                 
@@ -654,7 +652,7 @@ namespace BankApp
             text = text.Replace(globalVars.balances[globalVars.position], Convert.ToString(amountLeft));
             File.WriteAllText(globalVars.balancesPath, text);
             globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
-            AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " withdrew $" + WDAmount);
+            AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " withdrew $" + WDAmount, 1);
 
             Console.Clear();
             Logo();
@@ -694,7 +692,7 @@ namespace BankApp
             text = text.Replace(globalVars.balances[globalVars.position], Convert.ToString(newBalance));
             File.WriteAllText(globalVars.balancesPath, text);
             globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
-            AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " deposited $" + DPAmount);
+            AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " deposited $" + DPAmount, 2);
 
             clearLogoNInfo(globalVars);
             Console.WriteLine("You know have $" + newBalance + " in your account.");
@@ -801,7 +799,7 @@ namespace BankApp
                         text = text.Replace(globalVars.balances[globalVars.position], Convert.ToString(UserNewAmount));
                         File.WriteAllText(globalVars.balancesPath, text);
                         globalVars.balances = System.IO.File.ReadAllLines(globalVars.balancesPath);
-                        AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " transfered  $" + TNAmount + " to user " + globalVars.usernames[otherPosition]);
+                        AddChangeLogText(globalVars, "User " + globalVars.usernames[globalVars.position] + " transfered  $" + TNAmount + " to user " + globalVars.usernames[otherPosition], 3);
 
                         clearLogoNInfo(globalVars);
                         Console.WriteLine("Succesfully Sent $" + TNAmount + " to " + globalVars.usernames[otherPosition]);
@@ -825,7 +823,6 @@ namespace BankApp
         //Filestream managment
         private static string ShowText(string path, int number)
         {
-            //this also starts at zero, keep that in mind
             string[] line = System.IO.File.ReadAllLines(path);
             Console.WriteLine("the entry on line " + number + " is " + line[number - 1]);
             return (line[number - 1]);
@@ -836,9 +833,11 @@ namespace BankApp
             tsw.WriteLine(Addthis);
             tsw.Close();
         }
-        private static void AddChangeLogText(Global globalVars, string message)
+        private static void AddChangeLogText(Global globalVars, string message, int value)
         {
-            AddText(globalVars.changeLogPath, "-------------------------------------------------");
+            string[] changeLog = System.IO.File.ReadAllLines(globalVars.changeLogPath);
+            AddText(globalVars.changeLogPath, "Change #: " + (changeLog.Length)/5);
+            AddText(globalVars.changeLogPath, "ChangeValue: " + value);
             AddText(globalVars.changeLogPath, "Date and time: " + DateTime.Now.ToString());
             AddText(globalVars.changeLogPath, message);
             AddText(globalVars.changeLogPath, "-------------------------------------------------");

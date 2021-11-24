@@ -10,9 +10,6 @@ namespace BankApp
         public string buttonTwo;
         public string buttonThree;
         public int screenNumber;
-
-        public static void MethodOne()
-        { }
     }
  
 

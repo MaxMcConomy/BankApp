@@ -13,3 +13,5 @@ This Programs purpose is to be a make belive banking system
 - I can't get the object to give its info to a method
 - One of my console.readline's doesnt work
 - I completley forgot to add to the PMR
++ objests and classes were thrown out for filestream
++ changelog has been given a way to number its inputs
