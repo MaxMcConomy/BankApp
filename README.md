@@ -11,4 +11,4 @@ next go https://drive.google.com/drive/folders/1L9FXfZ6Gk14A_KccWsyhIpjoyBOXHHtA
 add a shortcut to the "BankApp" folder in your "My Drive"
 
 from there you can open the "G:" in your files and open the "App" folder and then open the "BankApp.exe" file
-you can create a shortcut to your destop if you want.
+you can create a shortcut to your desktop if you want.
